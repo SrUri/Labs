@@ -1,5 +1,6 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
-  devtools: { enabled: true }
+  modules: ['@nuxtjs/supabase'],
+  supabase: {
+    redirect: false // Lo ponemos en false para que no nos bloquee mientras desarrollamos el login
+  }
 })
