@@ -11,6 +11,7 @@
 </template>
 
 <script setup>
+definePageMeta({ ssr: false })
 const supabase = useSupabaseClient()
 const email = ref('')
 const password = ref('')

@@ -1,6 +1,10 @@
 export default defineNuxtConfig({
-  modules: ['@nuxtjs/supabase'],
+  compatibilityDate: '2026-04-07',
+  modules: [
+    '@nuxtjs/supabase',
+    '@nuxt/ui'
+  ],
   supabase: {
-    redirect: false // Lo ponemos en false para que no nos bloquee mientras desarrollamos el login
+    redirect: false
   }
 })
