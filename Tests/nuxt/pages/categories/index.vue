@@ -29,17 +29,21 @@
           <h3 class="text-lg font-semibold">{{ isEditing ? 'Editar' : 'Nova' }} Categoría</h3>
         </template>
 
-        <form @submit.prevent="saveCategory" class="space-y-4">
-          <UFormGroup label="Codi de la categoria" required>
-            <UInput v-model="form.code" placeholder="Ej: CAT-005" required />
+        <UForm :schema="schema" :state="form" @submit="saveCategory" class="space-y-4">
+          
+          <UFormGroup label="Codi de la categoria" name="code" required>
+            <UInput v-model="form.code" placeholder="Ej: CAT-005" />
           </UFormGroup>
-          <UFormGroup label="Nom" required>
-            <UInput v-model="form.name" placeholder="Nom de la categoria" required />
+          
+          <UFormGroup label="Nom" name="name" required>
+            <UInput v-model="form.name" placeholder="Nom de la categoria" />
           </UFormGroup>
-          <UFormGroup label="Descripció">
+          
+          <UFormGroup label="Descripció" name="description">
             <UTextarea v-model="form.description" />
           </UFormGroup>
-          <UFormGroup label="Categoria Pare (Opcional)">
+          
+          <UFormGroup label="Categoria Pare (Opcional)" name="parent_id">
             <USelectMenu 
               v-model="form.parent_id" 
               :options="parentOptions" 
@@ -48,11 +52,12 @@
               placeholder="Seleccionar..." 
             />
           </UFormGroup>
+
           <div class="flex justify-end gap-3 mt-6">
             <UButton color="gray" variant="ghost" @click="isModalOpen = false">Cancel·lar</UButton>
             <UButton type="submit" color="primary" :loading="saving">Guardar</UButton>
           </div>
-        </form>
+        </UForm>
       </UCard>
     </UModal>
 
@@ -82,6 +87,9 @@
 </template>
 
 <script setup>
+// CAMBIO 3: Importamos Zod
+import { z } from 'zod'
+
 definePageMeta({
   middleware: 'auth',
   layout: 'default'
@@ -91,10 +99,10 @@ const supabase = useSupabaseClient()
 
 // ESTADO GENERAL
 const isModalOpen = ref(false)
-const isDeleteModalOpen = ref(false) // Nuevo
+const isDeleteModalOpen = ref(false)
 const isEditing = ref(false)
 const saving = ref(false)
-const idToDelete = ref(null) // Nuevo
+const idToDelete = ref(null)
 
 // EL FORMULARIO
 const form = ref({
@@ -103,6 +111,14 @@ const form = ref({
   name: '',
   description: '',
   parent_id: null
+})
+
+// CAMBIO 4: Creamos las reglas de validación
+const schema = z.object({
+  code: z.string().min(3, 'El codi ha de tenir almenys 3 caràcters').max(20, 'El codi és massa llarg'),
+  name: z.string().min(2, 'El nom és obligatori').max(50, 'El nom és massa llarg'),
+  description: z.string().max(300, 'La descripció no pot superar els 300 caràcters').optional().nullable(),
+  parent_id: z.number().optional().nullable()
 })
 
 // CARGAR DATOS
@@ -155,6 +171,7 @@ const executeDelete = async () => {
   }
 }
 
+// Nuxt UI solo ejecutará esto si Zod dice que todo está correcto
 const saveCategory = async () => {
   saving.value = true
   try {

@@ -7,9 +7,9 @@
       
       <nav class="flex-1 p-4 space-y-2">
         <UButton block color="gray" variant="ghost" to="/" icon="i-heroicons-home">Dashboard</UButton>
-        <UButton block color="gray" variant="ghost" to="/categories" icon="i-heroicons-folder">Categorías</UButton>
-        <UButton block color="gray" variant="ghost" to="/products" icon="i-heroicons-shopping-bag">Productos</UButton>
-        <UButton block color="gray" variant="ghost" to="/calendar" icon="i-heroicons-calendar">Calendario</UButton>
+        <UButton block color="gray" variant="ghost" to="/categories" icon="i-heroicons-folder">Categories</UButton>
+        <UButton block color="gray" variant="ghost" to="/products" icon="i-heroicons-shopping-bag">Productes</UButton>
+        <UButton block color="gray" variant="ghost" to="/calendar" icon="i-heroicons-calendar">Calendari</UButton>
       </nav>
 
       <div class="p-4 border-t border-gray-200">
