@@ -2,7 +2,7 @@
   <UContainer class="max-w-6xl">
     <div class="mb-8">
       <h2 class="text-3xl font-bold text-gray-800">Dashboard</h2>
-      <p class="text-gray-500 mt-1">Benvingut al panell de control principal.</p>
+      <p class="text-gray-500 mt-1">Benvingut al panell d'admin.</p>
     </div>
 
     <div v-if="pending" class="space-y-4">
