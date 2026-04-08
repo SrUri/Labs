@@ -1,3 +1,5 @@
+// DefineNuxtRouteMiddleware: Abans de carregar una pàgina revisa si l'usuari està loggejat
+
 export default defineNuxtRouteMiddleware(async () => {
   const supabase = useSupabaseClient()
   const { data: { session } } = await supabase.auth.getSession()

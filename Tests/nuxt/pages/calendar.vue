@@ -113,20 +113,20 @@
 </template>
 
 <script setup>
-// IMPORTAMOS ZOD
+// Importem zod per validació de fluxos de dades
 import { z } from 'zod'
 
 definePageMeta({ middleware: 'auth', layout: 'default' })
 const supabase = useSupabaseClient()
 
-// ESTADO CALENDARIO
+// Estats calendari:
 const currentDate = ref(new Date())
 const currentYear = computed(() => currentDate.value.getFullYear())
 const currentMonthName = computed(() => {
   return currentDate.value.toLocaleString('ca-ES', { month: 'long' })
 })
 
-// ESTADO MODAL Y FORMULARIO
+// Estats formulari calendari:
 const isModalOpen = ref(false)
 const isEditing = ref(false)
 const isDeleteModalOpen = ref(false)
@@ -142,50 +142,57 @@ const form = ref({
   total_cost: 0
 })
 
-// === REGLAS DE VALIDACIÓN ZOD ===
+// Normes de validació zod
 const schema = z.object({
   order_date: z.string().min(1, 'La data és obligatòria'),
   product_id: z.number({ invalid_type_error: 'Selecciona un producte', required_error: 'Selecciona un producte' }).positive('Selecciona un producte'),
   units: z.coerce.number().int('Ha de ser un número sencer').min(1, 'Has de comprar almenys 1 unitat')
 })
 
-// 1. CARGAR DATOS
+// Carreguem dades
 const { data: products } = await useAsyncData('productsForCalendar', async () => {
   const { data } = await supabase.from('products').select('id, name, rates:product_rates(price, date_from, date_to)')
   return data
 })
 
+// Carreguem comandes
 const { data: orders, refresh } = await useAsyncData('calendarOrders', async () => {
   const { data } = await supabase.from('calendar_orders').select('*, product:products(name)')
   return data || []
 })
 
-// === LÓGICA DEL CALENDARIO ===
+// Graella del calendari
 const prevMonth = () => { currentDate.value = new Date(currentYear.value, currentDate.value.getMonth() - 1, 1) }
 const nextMonth = () => { currentDate.value = new Date(currentYear.value, currentDate.value.getMonth() + 1, 1) }
 
+// Comprovem si correspon a avui per pintar
 const isToday = (dateStr) => {
   const today = new Date()
   return dateStr === today.toISOString().split('T')[0]
 }
 
+// Tornem comandes segons dia
 const getOrdersForDay = (dateStr) => {
   return orders.value?.filter(o => o.order_date === dateStr) || []
 }
 
+// Dies del calendari
 const calendarDays = computed(() => {
   const year = currentYear.value
   const month = currentDate.value.getMonth()
   const days = []
   
+  // Mirem en quin dia cau el dia 1 del mes
   const firstDayOfMonth = new Date(year, month, 1).getDay()
   let emptyDays = firstDayOfMonth - 1
   if (emptyDays === -1) emptyDays = 6 
   
+  // Inserim caselles buides
   for (let i = 0; i < emptyDays; i++) {
     days.push({ empty: true })
   }
   
+  // Inserim els dies reals del mes
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   for (let i = 1; i <= daysInMonth; i++) {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`
@@ -195,7 +202,7 @@ const calendarDays = computed(() => {
   return days
 })
 
-// === CÁLCULO DE TARIFAS ===
+// Càlcul de les tarifes, amb watch observem l'usuari cada cop que toca producte o cantitat
 watch([() => form.value.product_id, () => form.value.order_date, () => form.value.units], () => {
   calculatingCost.value = true
   noRateFound.value = false
@@ -204,7 +211,7 @@ watch([() => form.value.product_id, () => form.value.order_date, () => form.valu
     if (form.value.product_id && form.value.order_date && form.value.units > 0) {
       const selectedProduct = products.value?.find(p => p.id === form.value.product_id)
       if (selectedProduct && selectedProduct.rates) {
-        
+        // Busquem tarifa del producte
         const orderDateObj = new Date(form.value.order_date)
         const applicableRate = selectedProduct.rates.find(rate => {
           const from = new Date(rate.date_from)
@@ -213,6 +220,7 @@ watch([() => form.value.product_id, () => form.value.order_date, () => form.valu
         })
 
         if (applicableRate) {
+          // Si trobem tarifa, calculem
           form.value.total_cost = (applicableRate.price * form.value.units).toFixed(2)
         } else {
           form.value.total_cost = 0
@@ -222,21 +230,23 @@ watch([() => form.value.product_id, () => form.value.order_date, () => form.valu
     }
     calculatingCost.value = false
   }, 300)
-}, { deep: true })
+}, { deep: true }) // Per observar canvis del producte
 
-// === ACCIONES CRUD ===
+// Netejem/creem formulari
 const openCreateModal = () => {
   form.value = { id: null, order_date: new Date().toISOString().split('T')[0], product_id: null, units: 1, total_cost: 0 }
   isEditing.value = false
   isModalOpen.value = true
 }
 
+// Editem formulari calendari
 const openEditModal = (order) => {
   form.value = { ...order }
   isEditing.value = true
   isModalOpen.value = true
 }
 
+// Guardem formulari calendari
 const saveOrder = async () => {
   if (noRateFound.value) return 
 
@@ -257,17 +267,18 @@ const saveOrder = async () => {
   isModalOpen.value = false
 }
 
-// === NUEVA LÓGICA DE BORRADO ===
+// Confirmem delete
 const confirmDelete = (id) => {
   orderIdToDelete.value = id
   isDeleteModalOpen.value = true
 }
 
+// Executem delete
 const executeDelete = async () => {
   await supabase.from('calendar_orders').delete().eq('id', orderIdToDelete.value)
   await refresh()
   isDeleteModalOpen.value = false
-  isModalOpen.value = false // Cerramos también el modal de edición de la cita
+  isModalOpen.value = false
   orderIdToDelete.value = null
 }
 </script>

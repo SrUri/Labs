@@ -87,7 +87,8 @@
 </template>
 
 <script setup>
-// CAMBIO 3: Importamos Zod
+
+// Importem zod per validació de fluxos de dades
 import { z } from 'zod'
 
 definePageMeta({
@@ -97,14 +98,14 @@ definePageMeta({
 
 const supabase = useSupabaseClient()
 
-// ESTADO GENERAL
+// Estats formulari categories:
 const isModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const isEditing = ref(false)
 const saving = ref(false)
 const idToDelete = ref(null)
 
-// EL FORMULARIO
+// Formulari:
 const form = ref({
   id: null,
   code: '',
@@ -113,7 +114,7 @@ const form = ref({
   parent_id: null
 })
 
-// CAMBIO 4: Creamos las reglas de validación
+// Normes de validació zod
 const schema = z.object({
   code: z.string().min(3, 'El codi ha de tenir almenys 3 caràcters').max(20, 'El codi és massa llarg'),
   name: z.string().min(2, 'El nom és obligatori').max(50, 'El nom és massa llarg'),
@@ -121,7 +122,7 @@ const schema = z.object({
   parent_id: z.number().optional().nullable()
 })
 
-// CARGAR DATOS
+// Carreguem dades
 const { data: categories, pending, refresh } = await useAsyncData('categories', async () => {
   const { data, error } = await supabase
     .from('categories')
@@ -129,38 +130,44 @@ const { data: categories, pending, refresh } = await useAsyncData('categories', 
     .order('id', { ascending: true })
     
   if (error) throw error
+  // columna actions amb botons
   return data.map(cat => ({ ...cat, actions: '' }))
 })
 
+// Categoria pare
 const parentOptions = computed(() => {
   if (!categories.value) return []
+  // Evitem bucles de categories assignant-se com a pares
   return categories.value.filter(c => c.id !== form.value.id)
 })
 
+// Netejar/crear formulari
 const openCreateModal = () => {
   form.value = { id: null, code: '', name: '', description: '', parent_id: null }
   isEditing.value = false
   isModalOpen.value = true
 }
 
+// Editar formulari
 const openEditModal = (row) => {
   form.value = { ...row }
   isEditing.value = true
   isModalOpen.value = true
 }
 
-// Lógica de borrado con Modal
+// Confirmació de borrar
 const confirmDelete = (id) => {
   idToDelete.value = id
-  isDeleteModalOpen.value = true
+  isDeleteModalOpen.value = true // obrim finestra
 }
 
+// Executar delete
 const executeDelete = async () => {
   saving.value = true
   try {
     const { error } = await supabase.from('categories').delete().eq('id', idToDelete.value)
     if (error) throw error
-    await refresh()
+    await refresh() // REFRESQUEM
     isDeleteModalOpen.value = false
   } catch (error) {
     console.error("Error al borrar:", error)
@@ -171,7 +178,7 @@ const executeDelete = async () => {
   }
 }
 
-// Nuxt UI solo ejecutará esto si Zod dice que todo está correcto
+// Si tot es correcte (limitacions zod), gaurdem la categoria
 const saveCategory = async () => {
   saving.value = true
   try {

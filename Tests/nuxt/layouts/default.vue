@@ -27,6 +27,7 @@
 <script setup>
 const supabase = useSupabaseClient()
 
+// HandleLogout: Gestió del logout
 const handleLogout = async () => {
   await supabase.auth.signOut()
   navigateTo('/login')

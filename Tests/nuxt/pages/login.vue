@@ -49,7 +49,7 @@
 </template>
 
 <script setup>
-// CAMBIO 4: Importamos Zod
+// Importem zod per validació de fluxos de dades
 import { z } from 'zod'
 
 definePageMeta({ 
@@ -59,25 +59,27 @@ definePageMeta({
 
 const supabase = useSupabaseClient()
 
-// CAMBIO 5: Agrupamos las variables en un objeto 'state' para que UForm lo entienda
+// Variables login
 const state = ref({
   email: '',
   password: ''
 })
 
-// CAMBIO 6: Reglas de validación Zod
+// Normes de validació zod
 const schema = z.object({
   email: z.string().email('Format de correu invàlid').min(1, 'El correu és obligatori'),
-  password: z.string().min(6, 'La contrasenya ha de tenir almenys 6 caràcters') // Supabase exige mínimo 6 por defecto
+  password: z.string().min(6, 'La contrasenya ha de tenir almenys 6 caràcters')
 })
 
 const error = ref(null)
 const loading = ref(false)
 
+// Manegador Login
 const handleLogin = async () => {
   loading.value = true
   error.value = null
   
+  // Petició inici sessió
   const { error: authError } = await supabase.auth.signInWithPassword({
     email: state.value.email,
     password: state.value.password,

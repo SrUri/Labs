@@ -148,23 +148,30 @@ const supabase = useSupabaseClient()
 const { data: stats, pending } = await useAsyncData('dashboardStats', async () => {
   const today = new Date().toISOString().split('T')[0]
 
-  // Añadimos la consulta de "recentCategories" al Promise.all
+  // Promise.all per fer les 6 consultes al mateix temps en comptes de await
   const [cats, prods, orders, recentProds, upcomingOrders, recentCats] = await Promise.all([
+    // Mostrem nombre categories
     supabase.from('categories').select('*', { count: 'exact', head: true }),
+    // Mostrem nombre productes
     supabase.from('products').select('*', { count: 'exact', head: true }),
+    // Mostrem nombre cites
     supabase.from('calendar_orders').select('*', { count: 'exact', head: true }),
+    // 5 últimes categories
+    supabase.from('categories').select('id, name, code').order('id', { ascending: false }).limit(5),
+    // 5 últims productes
     supabase.from('products').select('id, name, code').order('id', { ascending: false }).limit(5),
-    supabase.from('calendar_orders').select('id, order_date, units, total_cost, product:products(name)').gte('order_date', today).order('order_date', { ascending: true }).limit(5),
-    supabase.from('categories').select('id, name, code').order('id', { ascending: false }).limit(5)
+    // 5 ordres més properes
+    supabase.from('calendar_orders').select('id, order_date, units, total_cost, product:products(name)').gte('order_date', today).order('order_date', { ascending: true }).limit(5)
   ])
-
+  
+  // Passem valors
   return {
     categoriesCount: cats.count || 0,
     productsCount: prods.count || 0,
     ordersCount: orders.count || 0,
     recentProducts: recentProds.data || [],
     upcomingOrders: upcomingOrders.data || [],
-    recentCategories: recentCats.data || [] // Lo pasamos al template
+    recentCategories: recentCats.data || []
   }
 })
 </script>

@@ -122,13 +122,17 @@
 </template>
 
 <script setup>
+// Importem zod per validació de fluxos de dades
 import { z } from 'zod'
+// Importem XLSX per transformar en excel
 import * as XLSX from 'xlsx'
+// Importem jsPDF per fer documents PDF
 import { jsPDF } from 'jspdf'
 
 definePageMeta({ middleware: 'auth', layout: 'default' })
 const supabase = useSupabaseClient()
 
+// Estats formulari productes:
 const isModalOpen = ref(false)
 const isEditing = ref(false)
 const isDeleteModalOpen = ref(false)
@@ -138,20 +142,57 @@ const tempPhoto = ref('')
 
 const form = ref({ id: null, code: '', name: '', description: '', photos: [], category_ids: [], rates: [] })
 
-// === REGLAS DE VALIDACIÓN ZOD ===
+// Normes de validació zod
 const schema = z.object({
   code: z.string().min(3, 'Mínim 3 caràcters').max(20, 'Màxim 20 caràcters'),
   name: z.string().min(2, 'Nom obligatori').max(100, 'Nom massa llarg'),
   description: z.string().max(500, 'Descripció massa llarga').optional().nullable(),
   category_ids: z.array(z.number()).min(1, 'Selecciona almenys una categoria'),
-  // Validación de las tarifas
+  
+  // Validació preu
   rates: z.array(z.object({
     price: z.coerce.number({ invalid_type_error: 'Preu invàlid' }).positive('Ha de ser major que 0'),
     date_from: z.string().min(1, 'Data inicial obligatòria'),
     date_to: z.string().min(1, 'Data final obligatòria')
-  })).optional()
+  })).superRefine((rates, ctx) => {
+    
+    // Validem que en una data final i en una data inicial no hi hagi coincidencies de dies
+    rates.forEach((rate, index) => {
+      if (rate.date_from && rate.date_to) {
+        const from = new Date(rate.date_from)
+        const to = new Date(rate.date_to)
+        if (from > to) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'La data final no pot ser anterior a la inicial',
+            path: [index, 'date_to'] // Error
+          })
+        }
+      }
+    })
+
+    // Comprovem coincidencies dels preus dels productes
+    for (let i = 0; i < rates.length; i++) {
+      for (let j = i + 1; j < rates.length; j++) {
+        const start1 = new Date(rates[i].date_from)
+        const end1 = new Date(rates[i].date_to)
+        const start2 = new Date(rates[j].date_from)
+        const end2 = new Date(rates[j].date_to)
+
+        // Mirem si els rangs es creuen
+        if (start1 <= end2 && start2 <= end1) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Aquestes dates es solapen amb una altra tarifa',
+            path: [j, 'date_from'] // Error
+          })
+        }
+      }
+    }
+  }).optional()
 })
 
+// Dades
 const { data: products, pending, refresh } = await useAsyncData('products', async () => {
   const { data, error } = await supabase
     .from('products')
@@ -171,12 +212,15 @@ const { data: products, pending, refresh } = await useAsyncData('products', asyn
   }))
 })
 
+// Carreguem categories
 const { data: allCategories } = await useAsyncData('allCategories', async () => {
   const { data } = await supabase.from('categories').select('id, name')
   return data
 })
 
+// Exportem XLSX
 const exportXLS = () => {
+  // Map per fer files x columnes
   const dataForExcel = products.value.map(p => ({
     'Codi': p.code,
     'Nom': p.name,
@@ -187,11 +231,13 @@ const exportXLS = () => {
   const worksheet = XLSX.utils.json_to_sheet(dataForExcel)
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, "Productes")
-  XLSX.writeFile(workbook, "Llistat_Productes.xlsx")
+  XLSX.writeFile(workbook, "Llistat_Productes.xlsx") // Descarreguem excel
 }
 
+// Exportem PDF
 const exportPDF = (product) => {
   const doc = new jsPDF()
+  // Establim font i text
   doc.setFontSize(22)
   doc.text("Fitxa de Producte", 20, 20)
   doc.setFontSize(12)
@@ -213,12 +259,14 @@ const exportPDF = (product) => {
   } else {
     doc.text("- No hi ha tarifes configurades per a aquest producte.", 25, yPosition)
   }
-  doc.save(`Producte_${product.code}.pdf`)
+  doc.save(`Producte_${product.code}.pdf`) // Guardem PDF
 }
 
+// Afegim i treiem files de preus de productes
 const addRate = () => form.value.rates.push({ price: undefined, date_from: '', date_to: '' })
 const removeRate = (index) => form.value.rates.splice(index, 1)
 
+// Netejem/creem formulari
 const openCreateModal = () => {
   form.value = { id: null, code: '', name: '', description: '', photos: [], category_ids: [], rates: [] }
   tempPhoto.value = ''
@@ -226,6 +274,7 @@ const openCreateModal = () => {
   isModalOpen.value = true
 }
 
+// Editem formulari
 const openEditModal = (row) => {
   form.value = { 
     ...row, 
@@ -237,6 +286,7 @@ const openEditModal = (row) => {
   isModalOpen.value = true
 }
 
+// Guardem formulari
 const saveProduct = async () => {
   saving.value = true
   try {
@@ -248,18 +298,22 @@ const saveProduct = async () => {
     }
     let productId = form.value.id
     if (isEditing.value) {
+      // Esborrem relacions antigues i inserim les noves
       await supabase.from('products').update(productPayload).eq('id', productId)
       await supabase.from('product_categories').delete().eq('product_id', productId)
       await supabase.from('product_rates').delete().eq('product_id', productId)
     } else {
+      // Si es nou, inserim a la BD directament
       const { data } = await supabase.from('products').insert(productPayload).select().single()
       productId = data.id
     }
     if (form.value.category_ids.length > 0) {
+      // Inserim noves relacions de categoria
       const relations = form.value.category_ids.map(catId => ({ product_id: productId, category_id: catId }))
       await supabase.from('product_categories').insert(relations)
     }
     if (form.value.rates.length > 0) {
+      // Inserim noves relacions de preus
       const ratesPayload = form.value.rates.map(rate => ({
         product_id: productId, price: rate.price, date_from: rate.date_from, date_to: rate.date_to
       }))
@@ -275,11 +329,14 @@ const saveProduct = async () => {
   }
 }
 
+// Confirmem delete
 const confirmDelete = (id) => { idToDelete.value = id; isDeleteModalOpen.value = true }
 
+// Borrem 
 const executeDelete = async () => {
   saving.value = true
   try {
+    // Esborrem relacions
     await supabase.from('product_categories').delete().eq('product_id', idToDelete.value)
     await supabase.from('product_rates').delete().eq('product_id', idToDelete.value)
     await supabase.from('calendar_orders').delete().eq('product_id', idToDelete.value)
