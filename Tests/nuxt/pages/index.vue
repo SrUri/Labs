@@ -149,18 +149,18 @@ const { data: stats, pending } = await useAsyncData('dashboardStats', async () =
   const today = new Date().toISOString().split('T')[0]
 
   // Promise.all per fer les 6 consultes al mateix temps en comptes de await
-  const [cats, prods, orders, recentProds, upcomingOrders, recentCats] = await Promise.all([
+  const [cats, prods, orders, recentCats, recentProds, upcomingOrders] = await Promise.all([
     // Mostrem nombre categories
     supabase.from('categories').select('*', { count: 'exact', head: true }),
     // Mostrem nombre productes
     supabase.from('products').select('*', { count: 'exact', head: true }),
     // Mostrem nombre cites
     supabase.from('calendar_orders').select('*', { count: 'exact', head: true }),
-    // 5 últimes categories
+    // 5 últimes categories -> Va a la variable recentCats
     supabase.from('categories').select('id, name, code').order('id', { ascending: false }).limit(5),
-    // 5 últims productes
+    // 5 últims productes -> Va a la variable recentProds
     supabase.from('products').select('id, name, code').order('id', { ascending: false }).limit(5),
-    // 5 ordres més properes
+    // 5 ordres més properes -> Va a la variable upcomingOrders
     supabase.from('calendar_orders').select('id, order_date, units, total_cost, product:products(name)').gte('order_date', today).order('order_date', { ascending: true }).limit(5)
   ])
   

@@ -35,7 +35,7 @@
         </UFormGroup>
 
         <UButton type="submit" color="primary" block size="lg" :loading="loading" class="mt-2">
-          Entrar al Backoffice
+          Iniciar Sessió
         </UButton>
       </UForm>
 
