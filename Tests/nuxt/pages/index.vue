@@ -13,7 +13,7 @@
         <USkeleton class="h-64 w-full" />
       </div>
     </div>
-
+    
     <div v-else>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <UCard 
@@ -156,11 +156,11 @@ const { data: stats, pending } = await useAsyncData('dashboardStats', async () =
     supabase.from('products').select('*', { count: 'exact', head: true }),
     // Mostrem nombre cites
     supabase.from('calendar_orders').select('*', { count: 'exact', head: true }),
-    // 5 últimes categories -> Va a la variable recentCats
+    // 5 últimes categories
     supabase.from('categories').select('id, name, code').order('id', { ascending: false }).limit(5),
-    // 5 últims productes -> Va a la variable recentProds
+    // 5 últims productes
     supabase.from('products').select('id, name, code').order('id', { ascending: false }).limit(5),
-    // 5 ordres més properes -> Va a la variable upcomingOrders
+    // 5 ordres més properes
     supabase.from('calendar_orders').select('id, order_date, units, total_cost, product:products(name)').gte('order_date', today).order('order_date', { ascending: true }).limit(5)
   ])
   

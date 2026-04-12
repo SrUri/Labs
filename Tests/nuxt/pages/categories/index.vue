@@ -10,8 +10,12 @@
     <UCard>
       <UTable :rows="categories" :loading="pending">
         <template #parent_id-data="{ row }">
-          <UBadge v-if="row.parent_id" color="gray" variant="subtle">Subcategoria</UBadge>
-          <UBadge v-else color="primary" variant="subtle">Pare</UBadge>
+          <div class="flex items-center gap-2">
+            <UBadge v-if="row.parent_id" color="gray" variant="subtle">
+              Filla de: {{ getCategoryName(row.parent_id) }}
+            </UBadge>
+            <UBadge v-else color="primary" variant="subtle">Categoria Pare</UBadge>
+          </div>
         </template>
         
         <template #actions-data="{ row }">
@@ -87,7 +91,6 @@
 </template>
 
 <script setup>
-
 // Importem zod per validació de fluxos de dades
 import { z } from 'zod'
 
@@ -141,6 +144,13 @@ const parentOptions = computed(() => {
   return categories.value.filter(c => c.id !== form.value.id)
 })
 
+// Busca nom categoria pare
+const getCategoryName = (id) => {
+  if (!categories.value) return ''
+  const parent = categories.value.find(c => c.id === id)
+  return parent ? parent.name : ''
+}
+
 // Netejar/crear formulari
 const openCreateModal = () => {
   form.value = { id: null, code: '', name: '', description: '', parent_id: null }
@@ -178,7 +188,7 @@ const executeDelete = async () => {
   }
 }
 
-// Si tot es correcte (limitacions zod), gaurdem la categoria
+// Si tot es correcte (limitacions zod), guardem la categoria
 const saveCategory = async () => {
   saving.value = true
   try {
