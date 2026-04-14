@@ -9,11 +9,11 @@ class ProductRateSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Buscamos los productos que ya se crearon en el ProductSeeder
+        // Busquem productes creats
         $poma = Product::where('code', 'PROD-POMA')->first();
         $tonyina = Product::where('code', 'PROD-TONY')->first();
 
-        // 2. Creamos las tarifas asociadas a la Poma
+        // Tarifes poma
         if ($poma) {
             $poma->rates()->create([
                 'price' => 2.50,
@@ -22,12 +22,17 @@ class ProductRateSeeder extends Seeder
             ]);
         }
 
-        // 3. Creamos las tarifas asociadas a la Tonyina
+        // Tarifes tonyina
         if ($tonyina) {
             $tonyina->rates()->create([
                 'price' => 18.90,
                 'date_from' => '2026-04-01',
                 'date_to' => '2026-05-31',
+            ]);
+            $tonyina->rates()->create([
+                'price' => 24.50, 
+                'date_from' => '2026-06-01',
+                'date_to' => '2026-08-31',
             ]);
         }
     }
