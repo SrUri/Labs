@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 const Login = ({ onLoginSuccess }) => {
-    const [email, setEmail] = useState(''); // Pre-rellenado para el evaluador
+    const [email, setEmail] = useState(''); 
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -21,9 +21,10 @@ const Login = ({ onLoginSuccess }) => {
             const data = await response.json();
 
             if (response.ok) {
-                // Guardamos el token en el navegador
-                localStorage.setItem('auth_token', data.access_token);
-                onLoginSuccess(); // Avisamos a App.jsx de que podemos entrar
+                // CAMBIO AQUÍ: Usamos sessionStorage en lugar de localStorage
+                // Así el token se autodestruirá al cerrar la pestaña/navegador
+                sessionStorage.setItem('auth_token', data.access_token);
+                onLoginSuccess(); 
             } else {
                 setError(data.message || 'Error de acceso');
             }

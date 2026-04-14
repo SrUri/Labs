@@ -43,7 +43,7 @@ class CategoryController extends Controller
         ]);
 
         $category->update($validated);
-        return response()->json($category);
+        return response()->json($category->load('parent'));
     }
 
     // Borrar una categoría

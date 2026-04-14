@@ -28,6 +28,26 @@ class CalendarOrderController extends Controller
         return response()->json($order->load('product'), 201);
     }
 
+    public function update(Request $request, string $id)
+    {
+        // 1. Buscamos la comanda que queremos editar
+        $order = CalendarOrder::findOrFail($id);
+
+        // 2. Validamos que los datos que llegan de React sean correctos
+        $validated = $request->validate([
+            'order_date' => 'required|date',
+            'product_id' => 'required|exists:products,id',
+            'units' => 'required|integer|min:1',
+            'total_cost' => 'required|numeric|min:0'
+        ]);
+
+        // 3. Actualizamos la comanda en la base de datos
+        $order->update($validated);
+
+        // 4. Devolvemos la comanda actualizada (incluyendo el nombre del producto para que React no falle)
+        return response()->json($order->load('product'));
+    }
+
     public function destroy(string $id)
     {
         $order = CalendarOrder::findOrFail($id);
