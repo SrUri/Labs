@@ -40,7 +40,7 @@ setupFetchInterceptor();
 
 const App = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(!!sessionStorage.getItem('auth_token'));
-    const [activeTab, setActiveTab] = useState('dashboard'); // <-- Empezamos en el Dashboard
+    const [activeTab, setActiveTab] = useState('dashboard');
 
     const handleLogout = async () => {
         try {
@@ -70,28 +70,28 @@ const App = () => {
                             <button 
                                 className={`nav-link text-white me-2 ${activeTab === 'dashboard' ? 'active bg-success' : ''}`}
                                 onClick={() => setActiveTab('dashboard')}>
-                                <i className="bi bi-speedometer2 me-2"></i>Panel
+                                <i className="bi bi-speedometer2 me-2"></i>Panell
                             </button>
                             <button 
                                 className={`nav-link text-white me-2 ${activeTab === 'categories' ? 'active bg-success' : ''}`}
                                 onClick={() => setActiveTab('categories')}>
-                                <i className="bi bi-tags-fill me-2"></i>Categorías
+                                <i className="bi bi-tags-fill me-2"></i>Categories
                             </button>
                             <button 
                                 className={`nav-link text-white me-2 ${activeTab === 'products' ? 'active bg-success' : ''}`}
                                 onClick={() => setActiveTab('products')}>
-                                <i className="bi bi-box-seam-fill me-2"></i>Productos
+                                <i className="bi bi-box-seam-fill me-2"></i>Productes
                             </button>
                             <button 
                                 className={`nav-link text-white ${activeTab === 'orders' ? 'active bg-success' : ''}`}
                                 onClick={() => setActiveTab('orders')}>
-                                <i className="bi bi-calendar-check-fill me-2"></i>Pedidos
+                                <i className="bi bi-calendar-check-fill me-2"></i>Comandes
                             </button>
                         </div>
 
                         <div className="border-start border-secondary ps-4">
                             <button onClick={handleLogout} className="btn btn-outline-light btn-sm d-flex align-items-center gap-2">
-                                <i className="bi bi-box-arrow-right"></i> Salir
+                                <i className="bi bi-box-arrow-right"></i> LogOut
                             </button>
                         </div>
                     </div>
@@ -122,5 +122,5 @@ if (container) {
     const root = createRoot(container);
     root.render(<App />);
 } else {
-    console.error("No se encontró el contenedor. Asegúrate de tener <div id='app'></div> en tu archivo welcome.blade.php");
+    console.error("No s'ha trobat el contenidor");
 }

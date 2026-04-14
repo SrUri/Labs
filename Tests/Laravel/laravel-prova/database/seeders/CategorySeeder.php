@@ -8,12 +8,12 @@ class CategorySeeder extends Seeder
 {
     public function run(): void
     {
-        $fruta = Category::create(['code' => 'CAT-01', 'name' => 'FRUTAS', 'description' => 'Categoría principal de frutas']);
-        Category::create(['code' => 'CAT-01-A', 'name' => 'MANZANA', 'parent_id' => $fruta->id, 'description' => 'Subcategoría de manzanas']);
+        $fruta = Category::create(['code' => 'CAT-01', 'name' => 'FRUITES', 'description' => 'Categoria principal de fruites']);
+        Category::create(['code' => 'CAT-01-A', 'name' => 'POMES', 'parent_id' => $fruta->id, 'description' => 'Subcategoria de pomes']);
         
-        $carne = Category::create(['code' => 'CAT-02', 'name' => 'CARNES', 'description' => 'Categoría principal de carnes']);
-        Category::create(['code' => 'CAT-02-A', 'name' => 'ROJA', 'parent_id' => $carne->id, 'description' => 'Subcategoría de carnes rojas']);
+        $carne = Category::create(['code' => 'CAT-02', 'name' => 'CARNS', 'description' => 'Categoria principal de carns']);
+        Category::create(['code' => 'CAT-02-A', 'name' => 'VERMELLA', 'parent_id' => $carne->id, 'description' => 'Subcategoria de carns']);
 
-        Category::create(['code' => 'CAT-03', 'name' => 'PEIX', 'description' => 'Peix fresc de la llotja']);
+        Category::create(['code' => 'CAT-03', 'name' => 'PEIX', 'description' => 'Peix fresc, categoria pare']);
     }
 }

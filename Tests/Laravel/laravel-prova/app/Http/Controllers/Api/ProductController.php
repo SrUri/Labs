@@ -15,16 +15,31 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    public function store(Request $request)
+public function store(Request $request)
     {
         $validated = $request->validate([
             'code' => 'required|string|max:50|unique:products',
             'name' => 'required|string|max:100',
             'description' => 'nullable|string',
-            'photo' => 'nullable|string', // AHORA ES UN TEXTO (URL)
+            'photo' => 'nullable|string',
             'categories' => 'nullable|array',
             'rates' => 'nullable|array',
         ]);
+
+        // Validació de tarifes
+        if (!empty($validated['rates'])) {
+            $rates = $validated['rates'];
+            for ($i = 0; $i < count($rates); $i++) {
+                if ($rates[$i]['date_from'] > $rates[$i]['date_to']) {
+                    return response()->json(['error' => 'La data d\'inici no pot ser posterior a la data de fi.'], 422);
+                }
+                for ($j = $i + 1; $j < count($rates); $j++) {
+                    if ($rates[$i]['date_from'] <= $rates[$j]['date_to'] && $rates[$j]['date_from'] <= $rates[$i]['date_to']) {
+                        return response()->json(['error' => 'Hi ha tarifes amb dies repetits o superposats. Els rangs han de ser únics.'], 422);
+                    }
+                }
+            }
+        }
 
         DB::beginTransaction();
         try {
@@ -32,7 +47,7 @@ class ProductController extends Controller
                 'code' => $validated['code'],
                 'name' => $validated['name'],
                 'description' => $validated['description'] ?? null,
-                'photos' => $validated['photo'] ?? null, // Guardamos la URL
+                'photos' => $validated['photo'] ?? null,
             ]);
 
             if (isset($validated['categories'])) $product->categories()->sync($validated['categories']);
@@ -42,6 +57,62 @@ class ProductController extends Controller
 
             DB::commit();
             return response()->json($product->load(['categories', 'rates']), 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function update(Request $request, string $id)
+    {
+        $product = Product::findOrFail($id);
+        
+        $validated = $request->validate([
+            'code' => 'required|string|max:50|unique:products,code,'.$id,
+            'name' => 'required|string|max:100',
+            'description' => 'nullable|string',
+            'photo' => 'nullable|string',
+            'categories' => 'nullable|array',
+            'rates' => 'nullable|array',
+        ]);
+
+        // Validació de tarifes
+        if (!empty($validated['rates'])) {
+            $rates = $validated['rates'];
+            for ($i = 0; $i < count($rates); $i++) {
+                if ($rates[$i]['date_from'] > $rates[$i]['date_to']) {
+                    return response()->json(['error' => 'La data d\'inici no pot ser posterior a la data de fi.'], 422);
+                }
+                for ($j = $i + 1; $j < count($rates); $j++) {
+                    if ($rates[$i]['date_from'] <= $rates[$j]['date_to'] && $rates[$j]['date_from'] <= $rates[$i]['date_to']) {
+                        return response()->json(['error' => 'Hi ha tarifes amb dies repetits o superposats. Els rangs han de ser únics.'], 422);
+                    }
+                }
+            }
+        }
+
+        DB::beginTransaction();
+        try {
+            $product->update([
+                'code' => $validated['code'],
+                'name' => $validated['name'],
+                'description' => $validated['description'] ?? null,
+                'photos' => $validated['photo'] ?? null,
+            ]);
+
+            if (isset($validated['categories'])) {
+                $product->categories()->sync($validated['categories']);
+            }
+
+            if (isset($validated['rates'])) {
+                $product->rates()->delete();
+                foreach ($validated['rates'] as $rate) {
+                    $product->rates()->create($rate);
+                }
+            }
+
+            DB::commit();
+            return response()->json($product->load(['categories', 'rates']));
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
@@ -85,47 +156,6 @@ class ProductController extends Controller
     {
         $product = Product::with(['categories', 'rates'])->findOrFail($id);
         return response()->json($product);
-    }
-
-    public function update(Request $request, string $id)
-    {
-        $product = Product::findOrFail($id);
-        
-        $validated = $request->validate([
-            'code' => 'required|string|max:50|unique:products,code,'.$id,
-            'name' => 'required|string|max:100',
-            'description' => 'nullable|string',
-            'photo' => 'nullable|string', // AHORA ES UN TEXTO (URL)
-            'categories' => 'nullable|array',
-            'rates' => 'nullable|array',
-        ]);
-
-        DB::beginTransaction();
-        try {
-            $product->update([
-                'code' => $validated['code'],
-                'name' => $validated['name'],
-                'description' => $validated['description'] ?? null,
-                'photos' => $validated['photo'] ?? null, // Actualizamos la URL
-            ]);
-
-            if (isset($validated['categories'])) {
-                $product->categories()->sync($validated['categories']);
-            }
-
-            if (isset($validated['rates'])) {
-                $product->rates()->delete();
-                foreach ($validated['rates'] as $rate) {
-                    $product->rates()->create($rate);
-                }
-            }
-
-            DB::commit();
-            return response()->json($product->load(['categories', 'rates']));
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
     }
 
     public function destroy(string $id)

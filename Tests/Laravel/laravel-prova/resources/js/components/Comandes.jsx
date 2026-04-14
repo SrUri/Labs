@@ -28,11 +28,11 @@ const OrderManager = () => {
                     setRateWarning(''); 
                 } else {
                     setForm(prev => ({ ...prev, total_cost: '' }));
-                    setRateWarning('No hay tarifa para esta fecha.');
+                    setRateWarning('No hi ha tarifa per a aquesta data.');
                 }
             } else if (selectedProduct) {
                 setForm(prev => ({ ...prev, total_cost: '' }));
-                setRateWarning('Este producto no tiene tarifas.');
+                setRateWarning('Aquest producte no té tarifes.');
             }
         }
     }, [form.product_id, form.order_date, form.units, products]);
@@ -95,7 +95,7 @@ const OrderManager = () => {
 
     const renderCalendar = () => {
         const days = [];
-        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const monthNames = ["Gener", "Febrer", "Març", "Abril", "Maig", "Juny", "Juliol", "Agost", "Setembre", "Octubre", "Novembre", "Desembre"];
         
         for (let i = 0; i < startingDay; i++) {
             days.push(<div key={`empty-${i}`} className="border-end border-bottom p-2 bg-light"></div>);
@@ -106,19 +106,17 @@ const OrderManager = () => {
             const dayOrders = orders.filter(o => o.order_date.startsWith(currentDateStr));
 
             days.push(
-                // TRUCO CSS: Añadimos minWidth: 0 y overflow: hidden para que Grid no se estire
                 <div key={d} className="border-end border-bottom p-2 bg-white d-flex flex-column overflow-hidden" style={{ minWidth: 0 }}>
                     <div className={`fw-bold text-end mb-2 ${d === new Date().getDate() && currentMonth.getMonth() === new Date().getMonth() ? 'text-primary' : 'text-secondary'}`}>
                         {d}
                     </div>
-                    {/* TRUCO CSS: Limitamos también el contenedor interior */}
                     <div className="flex-grow-1" style={{ minWidth: 0 }}>
                         {dayOrders.map(order => (
                             <div key={order.id} 
                                  className={`badge w-100 text-start text-truncate mb-1 cursor-pointer shadow-sm py-2 ${editingId === order.id ? 'bg-warning text-dark' : 'bg-success'}`}
-                                 title={`${order.units}x ${order.product?.name || 'Borrado'}`} /* Mostramos el nombre entero al poner el ratón encima */
+                                 title={`${order.units}x ${order.product?.name || 'Borrado'}`}
                                  onClick={() => handleEdit(order)}>
-                                <i className="bi bi-pencil-square me-1"></i> {order.units}x {order.product?.name || 'Borrado'}
+                                <i className="bi bi-pencil-square me-1"></i> {order.units}x {order.product?.name || 'Borrat'}
                             </div>
                         ))}
                     </div>
@@ -140,14 +138,14 @@ const OrderManager = () => {
                 <div className="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                     <button className="btn btn-sm btn-outline-light" onClick={prevMonth}>&laquo; Anterior</button>
                     <h5 className="mb-0 fw-bold text-uppercase">{monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}</h5>
-                    <button className="btn btn-sm btn-outline-light" onClick={nextMonth}>Siguiente &raquo;</button>
+                    <button className="btn btn-sm btn-outline-light" onClick={nextMonth}>Següent &raquo;</button>
                 </div>
                 <div className="card-body p-0">
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }} className="text-center bg-light fw-bold border-bottom">
-                        <div className="p-2 border-end text-muted">Lun</div><div className="p-2 border-end text-muted">Mar</div>
-                        <div className="p-2 border-end text-muted">Mié</div><div className="p-2 border-end text-muted">Jue</div>
-                        <div className="p-2 border-end text-muted">Vie</div><div className="p-2 border-end text-muted">Sáb</div>
-                        <div className="p-2 text-muted text-danger">Dom</div>
+                        <div className="p-2 border-end text-muted">Dill</div><div className="p-2 border-end text-muted">Dim</div>
+                        <div className="p-2 border-end text-muted">Dimc</div><div className="p-2 border-end text-muted">Dij</div>
+                        <div className="p-2 border-end text-muted">Div</div><div className="p-2 border-end text-muted">Dis</div>
+                        <div className="p-2 text-muted text-danger">Diu</div>
                     </div>
                     {/* El calendario ahora mantendrá sus columnas estrictas */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridAutoRows: 'minmax(120px, auto)' }}>{days}</div>
@@ -164,15 +162,15 @@ const OrderManager = () => {
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content border-0 shadow">
                             <div className="modal-header bg-danger text-white border-0">
-                                <h5 className="modal-title fw-bold">Confirmar Eliminación</h5>
+                                <h5 className="modal-title fw-bold">Confirmar Eliminació</h5>
                                 <button type="button" className="btn-close btn-close-white" onClick={() => setItemToDelete(null)}></button>
                             </div>
                             <div className="modal-body p-4 text-center">
-                                <p className="mb-0 fs-5">¿Deseas eliminar definitivamente este pedido del calendario?</p>
+                                <p className="mb-0 fs-5">Vols eliminar definitivament aquesta comanda del calendari?</p>
                             </div>
                             <div className="modal-footer bg-light border-0 justify-content-center">
-                                <button type="button" className="btn btn-secondary px-4" onClick={() => setItemToDelete(null)}>Cancelar</button>
-                                <button type="button" className="btn btn-danger px-4 fw-bold" onClick={confirmDelete}>Sí, eliminar</button>
+                                <button type="button" className="btn btn-secondary px-4" onClick={() => setItemToDelete(null)}>Cancel·lar</button>
+                                <button type="button" className="btn btn-danger px-4 fw-bold" onClick={confirmDelete}>Si, eliminar</button>
                             </div>
                         </div>
                     </div>
@@ -182,17 +180,17 @@ const OrderManager = () => {
             <div className="col-lg-3 mb-4">
                 <div className={`card shadow-sm border-0 ${editingId ? 'border border-warning' : ''}`}>
                     <div className={`card-header text-dark fw-bold ${editingId ? 'bg-warning' : 'bg-light border-bottom'}`}>
-                        {editingId ? '✏️ Editando Comanda' : '🛒 Añadir Comanda'}
+                        {editingId ? 'Editar Comanda' : 'Afegir Comanda'}
                     </div>
                     <div className="card-body">
                         <form onSubmit={handleSubmit}>
                             <div className="mb-3">
-                                <label className="form-label small fw-bold">Fecha</label>
+                                <label className="form-label small fw-bold">Data</label>
                                 <input type="date" className="form-control" required
                                     value={form.order_date} onChange={e => setForm({...form, order_date: e.target.value})} />
                             </div>
                             <div className="mb-3">
-                                <label className="form-label small fw-bold">Producto</label>
+                                <label className="form-label small fw-bold">Producte</label>
                                 <select className="form-select" required
                                     value={form.product_id} onChange={e => setForm({...form, product_id: e.target.value})}>
                                     <option value="">Selecciona...</option>
@@ -202,24 +200,24 @@ const OrderManager = () => {
                                 </select>
                             </div>
                             <div className="mb-3">
-                                <label className="form-label small fw-bold">Unidades</label>
+                                <label className="form-label small fw-bold">Unitats</label>
                                 <input type="number" min="1" className="form-control" required
                                     value={form.units} onChange={e => setForm({...form, units: e.target.value})} />
                             </div>
                             <div className="mb-3">
-                                <label className="form-label small fw-bold">Coste Total (€)</label>
+                                <label className="form-label small fw-bold">Cost Total (€)</label>
                                 <input type="number" step="0.01" className={`form-control ${rateWarning ? 'is-invalid' : ''}`} required readOnly
                                     value={form.total_cost} placeholder="..." />
                                 {rateWarning && <div className="invalid-feedback">{rateWarning}</div>}
                             </div>
                             
                             <button type="submit" className={`btn w-100 fw-bold mb-2 ${editingId ? 'btn-warning' : 'btn-dark'}`} disabled={!!rateWarning || !form.total_cost}>
-                                {editingId ? 'Guardar Cambios' : 'Registrar Comanda'}
+                                {editingId ? 'Guardar Canvis' : 'Registrar Comanda'}
                             </button>
 
                             {editingId && (
                                 <div className="d-flex gap-2">
-                                    <button type="button" className="btn btn-outline-secondary w-50" onClick={cancelEdit}>Cancelar</button>
+                                    <button type="button" className="btn btn-outline-secondary w-50" onClick={cancelEdit}>Cancel·lar</button>
                                     <button type="button" className="btn btn-outline-danger w-50" onClick={() => setItemToDelete(editingId)}>Eliminar</button>
                                 </div>
                             )}
@@ -229,7 +227,7 @@ const OrderManager = () => {
             </div>
 
             <div className="col-lg-9">
-                {loading ? <div className="p-4 text-center">Cargando calendario...</div> : renderCalendar()}
+                {loading ? <div className="p-4 text-center">Carregant calendari...</div> : renderCalendar()}
             </div>
         </div>
     );

@@ -21,15 +21,13 @@ const Login = ({ onLoginSuccess }) => {
             const data = await response.json();
 
             if (response.ok) {
-                // CAMBIO AQUÍ: Usamos sessionStorage en lugar de localStorage
-                // Así el token se autodestruirá al cerrar la pestaña/navegador
                 sessionStorage.setItem('auth_token', data.access_token);
                 onLoginSuccess(); 
             } else {
-                setError(data.message || 'Error de acceso');
+                setError(data.message || 'Error acces');
             }
         } catch (err) {
-            setError('Error conectando con el servidor');
+            setError('Error conectant amb el servidor');
         }
         setLoading(false);
     };
@@ -41,7 +39,7 @@ const Login = ({ onLoginSuccess }) => {
                     <div className="card-body p-5">
                         <div className="text-center mb-4">
                             <h2 className="fw-bold">Studiogenesis</h2>
-                            <p className="text-muted">Acceso al Backoffice</p>
+                            <p className="text-muted">Accès al Backoffice</p>
                         </div>
 
                         {error && <div className="alert alert-danger">{error}</div>}
@@ -53,12 +51,12 @@ const Login = ({ onLoginSuccess }) => {
                                     value={email} onChange={e => setEmail(e.target.value)} />
                             </div>
                             <div className="mb-4">
-                                <label className="form-label fw-bold small">Contraseña</label>
+                                <label className="form-label fw-bold small">Contrassenya</label>
                                 <input type="password" className="form-control" required
                                     value={password} onChange={e => setPassword(e.target.value)} />
                             </div>
                             <button type="submit" className="btn btn-dark w-100 py-2" disabled={loading}>
-                                {loading ? 'Comprobando...' : 'Entrar'}
+                                {loading ? 'Comprovant...' : 'Iniciar sessió'}
                             </button>
                         </form>
                     </div>

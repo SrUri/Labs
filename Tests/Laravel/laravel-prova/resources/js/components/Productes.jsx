@@ -59,16 +59,32 @@ const ProductManager = () => {
         setForm(initialForm);
     };
 
-    // VOLVEMOS AL JSON LIMPIO Y FÁCIL
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validem dates introduides
+        const rates = form.rates;
+        for (let i = 0; i < rates.length; i++) {
+            if (rates[i].date_from > rates[i].date_to) {
+                alert("Error: La data d'inici d'una tarifa no pot ser posterior a la data de fi.");
+                return;
+            }
+            
+            for (let j = i + 1; j < rates.length; j++) {
+                if (rates[i].date_from <= rates[j].date_to && rates[j].date_from <= rates[i].date_to) {
+                    alert("Error: Has introduït tarifes amb dates que coincideixen o es superposen en els mateixos dies.");
+                    return;
+                }
+            }
+        }
+
         const url = editingId ? `/api/products/${editingId}` : '/api/products';
         const method = editingId ? 'PUT' : 'POST';
 
         try {
             const response = await fetch(url, {
                 method: method, 
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, 
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('auth_token')}` }, 
                 body: JSON.stringify(form)
             });
 
@@ -143,15 +159,15 @@ const ProductManager = () => {
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content border-0 shadow">
                             <div className="modal-header bg-danger text-white border-0">
-                                <h5 className="modal-title fw-bold">Confirmar Eliminación</h5>
+                                <h5 className="modal-title fw-bold">Confirmar Eliminació</h5>
                                 <button type="button" className="btn-close btn-close-white" onClick={() => setItemToDelete(null)}></button>
                             </div>
                             <div className="modal-body p-4 text-center">
-                                <p className="mb-0 fs-5">Se eliminará el producto y <b>todas sus tarifas</b>.</p>
+                                <p className="mb-0 fs-5">S'eliminarà el producte i <b>totes les seves tarifes</b>.</p>
                             </div>
                             <div className="modal-footer bg-light border-0 justify-content-center">
-                                <button type="button" className="btn btn-secondary px-4" onClick={() => setItemToDelete(null)}>Cancelar</button>
-                                <button type="button" className="btn btn-danger px-4 fw-bold" onClick={confirmDelete}>Sí, eliminar</button>
+                                <button type="button" className="btn btn-secondary px-4" onClick={() => setItemToDelete(null)}>Cancel·lar</button>
+                                <button type="button" className="btn btn-danger px-4 fw-bold" onClick={confirmDelete}>Si, eliminar</button>
                             </div>
                         </div>
                     </div>
@@ -161,23 +177,23 @@ const ProductManager = () => {
             <div className="col-lg-5 mb-4">
                 <div className="card shadow-sm border-0">
                     <div className={`card-header text-white fw-bold ${editingId ? 'bg-info' : 'bg-primary'}`}>
-                        {editingId ? '✏️ Editar Producto' : '✨ Nuevo Producto'}
+                        {editingId ? 'Editar Producte' : 'Nou Producte'}
                     </div>
                     <div className="card-body">
                         <form onSubmit={handleSubmit}>
                             <div className="row mb-3">
                                 <div className="col-6">
-                                    <label className="form-label small fw-bold">CÓDIGO</label>
+                                    <label className="form-label small fw-bold">CODI</label>
                                     <input type="text" className="form-control" required value={form.code} onChange={e => setForm({...form, code: e.target.value})} />
                                 </div>
                                 <div className="col-6">
-                                    <label className="form-label small fw-bold">NOMBRE</label>
+                                    <label className="form-label small fw-bold">NOM</label>
                                     <input type="text" className="form-control" required value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
                                 </div>
                             </div>
                             
                             <div className="mb-3">
-                                <label className="form-label small fw-bold">DESCRIPCIÓN</label>
+                                <label className="form-label small fw-bold">DESCRIPCIÓ</label>
                                 <textarea className="form-control" rows="2" value={form.description} onChange={e => setForm({...form, description: e.target.value})}></textarea>
                             </div>
 
@@ -188,7 +204,7 @@ const ProductManager = () => {
                             </div>
 
                             <div className="mb-3">
-                                <label className="form-label small fw-bold">CATEGORÍAS</label>
+                                <label className="form-label small fw-bold">CATEGORIES</label>
                                 <div className="border rounded p-2 bg-light" style={{maxHeight: '150px', overflowY: 'auto'}}>
                                     {categories.map(cat => (
                                         <div className="form-check" key={cat.id}>
@@ -201,21 +217,21 @@ const ProductManager = () => {
 
                             <div className="mb-3">
                                 <div className="d-flex justify-content-between align-items-center mb-2">
-                                    <label className="form-label small fw-bold mb-0">TARIFAS</label>
-                                    <button type="button" className="btn btn-sm btn-success" onClick={addRateRow}>+ Añadir</button>
+                                    <label className="form-label small fw-bold mb-0">TARIFES</label>
+                                    <button type="button" className="btn btn-sm btn-success" onClick={addRateRow}>+ Afegir</button>
                                 </div>
                                 {form.rates.map((rate, index) => (
                                     <div className="row g-2 mb-2 align-items-end bg-light p-2 rounded border" key={index}>
                                         <div className="col-3">
-                                            <small className="text-muted d-block">Precio(€)</small>
+                                            <small className="text-muted d-block">Preu(€)</small>
                                             <input type="number" step="0.01" className="form-control form-control-sm" required value={rate.price} onChange={e => updateRate(index, 'price', e.target.value)} />
                                         </div>
                                         <div className="col-4">
-                                            <small className="text-muted d-block">Desde</small>
+                                            <small className="text-muted d-block">Des del</small>
                                             <input type="date" className="form-control form-control-sm" required value={rate.date_from} onChange={e => updateRate(index, 'date_from', e.target.value)} />
                                         </div>
                                         <div className="col-4">
-                                            <small className="text-muted d-block">Hasta</small>
+                                            <small className="text-muted d-block">Fins al</small>
                                             <input type="date" className="form-control form-control-sm" required value={rate.date_to} onChange={e => updateRate(index, 'date_to', e.target.value)} />
                                         </div>
                                         <div className="col-1 text-end">
@@ -225,9 +241,9 @@ const ProductManager = () => {
                                 ))}
                             </div>
                             <button type="submit" className={`btn w-100 fw-bold ${editingId ? 'btn-info text-white' : 'btn-primary'}`}>
-                                {editingId ? 'Guardar Cambios' : 'Crear Producto'}
+                                {editingId ? 'Guardar Canvis' : 'Crear Producte'}
                             </button>
-                            {editingId && <button type="button" className="btn btn-light w-100 mt-2" onClick={cancelEdit}>Cancelar Edición</button>}
+                            {editingId && <button type="button" className="btn btn-light w-100 mt-2" onClick={cancelEdit}>Cancel·lar Edició</button>}
                         </form>
                     </div>
                 </div>
@@ -242,14 +258,14 @@ const ProductManager = () => {
 
                 <div className="card shadow-sm border-0">
                     <div className="card-body p-0 table-responsive">
-                        {loading ? <div className="p-5 text-center">Cargando...</div> : (
+                        {loading ? <div className="p-5 text-center">Carregant...</div> : (
                             <table className="table table-hover align-middle mb-0">
                                 <thead className="table-light">
                                     <tr>
-                                        <th>Producto</th>
-                                        <th>Categorías</th>
-                                        <th>Tarifas</th>
-                                        <th className="text-end">Acciones</th>
+                                        <th>Producte</th>
+                                        <th>Categories</th>
+                                        <th>Tarifes</th>
+                                        <th className="text-end">Accions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -270,7 +286,7 @@ const ProductManager = () => {
                                                 {prod.categories.map(c => <span key={c.id} className="badge bg-info text-dark me-1">{c.name}</span>)}
                                             </td>
                                             <td>
-                                                {prod.rates.length > 0 ? <span className="badge bg-success">{prod.rates.length} tramos</span> : <span className="text-muted small">Sin tarifas</span>}
+                                                {prod.rates.length > 0 ? <span className="badge bg-success">{prod.rates.length} trams</span> : <span className="text-muted small">Sense tarifes</span>}
                                             </td>
                                             <td className="text-end text-nowrap">
                                                 <button onClick={() => downloadPdf(prod.id)} className="btn btn-sm btn-outline-danger me-2" title="Descargar PDF">

@@ -79,16 +79,16 @@ const CategoryManager = () => {
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content border-0 shadow">
                             <div className="modal-header bg-danger text-white border-0">
-                                <h5 className="modal-title fw-bold"><i className="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Eliminación</h5>
+                                <h5 className="modal-title fw-bold"><i className="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Eliminació</h5>
                                 <button type="button" className="btn-close btn-close-white" onClick={() => setItemToDelete(null)}></button>
                             </div>
                             <div className="modal-body p-4 text-center">
-                                <p className="mb-0 fs-5">¿Estás seguro de que deseas eliminar esta categoría?</p>
-                                <small className="text-muted">Esta acción no se puede deshacer.</small>
+                                <p className="mb-0 fs-5"> Estas segur de que vols eliminar aquesta categoria?</p>
+                                <small className="text-muted">Aquesta acció no es pot desfer.</small>
                             </div>
                             <div className="modal-footer bg-light border-0 justify-content-center">
-                                <button type="button" className="btn btn-secondary px-4" onClick={() => setItemToDelete(null)}>Cancelar</button>
-                                <button type="button" className="btn btn-danger px-4 fw-bold" onClick={confirmDelete}>Sí, eliminar</button>
+                                <button type="button" className="btn btn-secondary px-4" onClick={() => setItemToDelete(null)}>Cancel·lar</button>
+                                <button type="button" className="btn btn-danger px-4 fw-bold" onClick={confirmDelete}>Si, eliminar</button>
                             </div>
                         </div>
                     </div>
@@ -98,40 +98,40 @@ const CategoryManager = () => {
             <div className="col-md-4 mb-4">
                 <div className="card shadow-sm border-0">
                     <div className={`card-header text-white fw-bold ${editingId ? 'bg-info' : 'bg-dark'}`}>
-                        {editingId ? '✏️ Editar Categoría' : '✨ Nueva Categoría'}
+                        {editingId ? 'Editar Categoria' : 'Nova Categoria'}
                     </div>
                     <div className="card-body">
                         <form onSubmit={handleSubmit}>
                             <div className="mb-3">
-                                <label className="form-label small fw-bold">Código</label>
+                                <label className="form-label small fw-bold">CODI</label>
                                 <input type="text" className="form-control" required 
                                     value={form.code} onChange={e => setForm({...form, code: e.target.value})} />
                             </div>
                             <div className="mb-3">
-                                <label className="form-label small fw-bold">Nombre</label>
+                                <label className="form-label small fw-bold">NOM</label>
                                 <input type="text" className="form-control" required 
                                     value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
                             </div>
                             <div className="mb-3">
-                                <label className="form-label small fw-bold">Descripción</label>
+                                <label className="form-label small fw-bold">DESCRIPCIÓ</label>
                                 <textarea className="form-control" rows="2" 
                                     value={form.description} onChange={e => setForm({...form, description: e.target.value})}></textarea>
                             </div>
                             <div className="mb-3">
-                                <label className="form-label small fw-bold">Categoría Padre</label>
+                                <label className="form-label small fw-bold">CATEGORIA PARE</label>
                                 <select className="form-select" 
                                     value={form.parent_id} onChange={e => setForm({...form, parent_id: e.target.value})}>
-                                    <option value="">Ninguna</option>
+                                    <option value="">Cap</option>
                                     {categories.map(cat => (
                                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                                     ))}
                                 </select>
                             </div>
                             <button type="submit" className={`btn w-100 fw-bold ${editingId ? 'btn-info text-white' : 'btn-primary'}`}>
-                                {editingId ? 'Actualizar Categoría' : 'Guardar Categoría'}
+                                {editingId ? 'Actualizar Categoria' : 'Guardar Categoria'}
                             </button>
                             {editingId && (
-                                <button type="button" className="btn btn-light w-100 mt-2" onClick={cancelEdit}>Cancelar Edición</button>
+                                <button type="button" className="btn btn-light w-100 mt-2" onClick={cancelEdit}>Cancel·lar Edició</button>
                             )}
                         </form>
                     </div>
@@ -141,15 +141,15 @@ const CategoryManager = () => {
             <div className="col-md-8">
                 <div className="card shadow-sm border-0">
                     <div className="card-body p-0 table-responsive">
-                        {loading ? <div className="text-center p-5">Cargando...</div> : (
+                        {loading ? <div className="text-center p-5">Carregant...</div> : (
                             <table className="table table-hover align-middle mb-0">
                                 <thead className="table-light">
                                     <tr>
-                                        <th>Código</th>
-                                        <th>Nombre</th>
-                                        <th>Descripción</th>
-                                        <th>Padre</th>
-                                        <th className="text-end">Acciones</th>
+                                        <th>Codi</th>
+                                        <th>Nom</th>
+                                        <th>Descripció</th>
+                                        <th>Pare</th>
+                                        <th className="text-end">Accions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -161,7 +161,7 @@ const CategoryManager = () => {
                                                 {cat.description ? (
                                                     <span className="text-muted small">{cat.description}</span>
                                                 ) : (
-                                                    <span className="text-black-50 small fst-italic">Sin descripción</span>
+                                                    <span className="text-black-50 small fst-italic">Sense descripció</span>
                                                 )}
                                             </td>
                                             <td>{cat.parent ? cat.parent.name : '-'}</td>

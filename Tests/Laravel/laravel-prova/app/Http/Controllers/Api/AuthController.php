@@ -16,18 +16,18 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
-        // Intentamos iniciar sesión usando el Guard por defecto
+        // Intentem iniciar sessió
         if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['message' => 'Credenciales incorrectas'], 401);
+            return response()->json(['message' => 'Credencials incorrectes'], 401);
         }
 
         $user = User::where('email', $request->email)->firstOrFail();
         
-        // Creamos el token de seguridad
+        // Creaem token de seguretat
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Hola de nuevo, ' . $user->name,
+            'message' => 'Hola de nou, ' . $user->name,
             'access_token' => $token,
             'token_type' => 'Bearer',
         ]);
@@ -37,6 +37,6 @@ class AuthController extends Controller
     {
         // Borramos el token para cerrar sesión
         $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Sesión cerrada correctamente']);
+        return response()->json(['message' => 'Sessió tancada correctament']);
     }
 }
