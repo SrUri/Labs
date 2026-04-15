@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
 {
+    // Creem categories
     public function run(): void
     {
         $fruta = Category::create(['code' => 'CAT-01', 'name' => 'FRUITES', 'description' => 'Categoria principal de fruites']);

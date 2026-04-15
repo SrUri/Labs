@@ -11,7 +11,7 @@ class CalendarOrder extends Model
 
     protected $fillable = ['order_date', 'product_id', 'units', 'total_cost'];
 
-    // Relación N:1 con Producto (Una comanda pertenece a un producto)
+    // Relació N:1 amb producte (una comanda es d'un producte en específic)
     public function product()
     {
         return $this->belongsTo(Product::class);

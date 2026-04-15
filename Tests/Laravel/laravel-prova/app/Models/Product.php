@@ -11,19 +11,19 @@ class Product extends Model
 
     protected $fillable = ['code', 'name', 'description', 'photos'];
 
-    // Relación N:M con Categorías
+    // Relació N:M amb Categories
     public function categories()
     {
         return $this->belongsToMany(Category::class);
     }
 
-    // Relación 1:N con Tarifas
+    // Relació 1:N amb tarifes (un producte pot tenir varies tarifes)
     public function rates()
     {
         return $this->hasMany(ProductRate::class);
     }
 
-    // Relación 1:N con Pedidos (Comandas)
+    // Relació 1:N amb producte (una comanda es d'un producte)
     public function orders()
     {
         return $this->hasMany(CalendarOrder::class);

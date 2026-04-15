@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 
 class CalendarOrderSeeder extends Seeder
 {
+    // Creem comandes
     public function run(): void
     {
         $poma = Product::where('code', 'PROD-POMA')->first();

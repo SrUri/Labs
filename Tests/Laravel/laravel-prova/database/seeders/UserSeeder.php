@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
+    // Creem usuari
     public function run(): void
     {
         User::create([

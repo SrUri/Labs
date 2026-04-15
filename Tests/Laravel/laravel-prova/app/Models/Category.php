@@ -9,22 +9,21 @@ class Category extends Model
 {
     use HasFactory;
 
-    // Los campos que permitimos guardar masivamente
     protected $fillable = ['code', 'name', 'description', 'parent_id'];
 
-    // LA RELACIÓN QUE FALTA: Una categoría pertenece a un padre
+    // Una categoria pot tenir un pare
     public function parent()
     {
         return $this->belongsTo(Category::class, 'parent_id');
     }
 
-    // Una categoría puede tener muchas subcategorías (hijas)
+    // Una categoria pare pot tenir subcategories
     public function children()
     {
         return $this->hasMany(Category::class, 'parent_id');
     }
 
-    // Relación con Productos
+    // Relació N:M amb Productes
     public function products()
     {
         return $this->belongsToMany(Product::class);

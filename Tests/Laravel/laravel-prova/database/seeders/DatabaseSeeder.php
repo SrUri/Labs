@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
+    // Seeder mestre, crida a la resta de seeders
     public function run(): void
     {
         $this->call([

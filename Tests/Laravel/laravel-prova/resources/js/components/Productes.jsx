@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
 
 const ProductManager = () => {
+    // Estats principals
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState(null);
     const [itemToDelete, setItemToDelete] = useState(null);
 
-    // AHORA PHOTO ES UN STRING VACÍO
+    // Arrays per suportar relacions multiples (Categories i Tarifes dinàmiques)
     const initialForm = { code: '', name: '', description: '', categories: [], rates: [], photo: '' };
     const [form, setForm] = useState(initialForm);
 
+    // Carreguem Productes i Categories
     const fetchData = async () => {
         setLoading(true);
         try {
+            // Utilitzem Promise.all per a que es faci alhora
             const [prodRes, catRes] = await Promise.all([ fetch('/api/products'), fetch('/api/categories') ]);
             if (prodRes.ok && catRes.ok) {
                 setProducts(await prodRes.json());
@@ -27,20 +30,27 @@ const ProductManager = () => {
 
     useEffect(() => { fetchData(); }, []);
 
+    // Afegim fila buida 
     const addRateRow = () => setForm({ ...form, rates: [...form.rates, { price: '', date_from: '', date_to: '' }] });
+
+    // Actualitzem un camp d'una fila específica de tarifes
     const updateRate = (index, field, value) => {
         const newRates = [...form.rates];
         newRates[index][field] = value;
         setForm({ ...form, rates: newRates });
     };
+
+    // Eliminem una fila per index
     const removeRateRow = (index) => setForm({ ...form, rates: form.rates.filter((_, i) => i !== index) });
 
+    // Si la categoria està seleccionada, la posem al formulari. Si no, l'afegim a l'array.
     const handleCategoryToggle = (id) => {
         const currentCats = form.categories;
         const newCats = currentCats.includes(id) ? currentCats.filter(catId => catId !== id) : [...currentCats, id];
         setForm({ ...form, categories: newCats });
     };
 
+    // Preparació edició
     const handleEdit = (prod) => {
         setEditingId(prod.id);
         setForm({
@@ -49,20 +59,22 @@ const ProductManager = () => {
             description: prod.description || '',
             categories: prod.categories.map(c => c.id),
             rates: prod.rates.map(r => ({ price: r.price, date_from: r.date_from, date_to: r.date_to })),
-            photo: prod.photos || '' // Cargamos la URL
+            photo: prod.photos || ''
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    // Cancel·lar edició
     const cancelEdit = () => {
         setEditingId(null);
         setForm(initialForm);
     };
 
+    // Guardem i validem dades
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validem dates introduides
+        // Validem les dates 
         const rates = form.rates;
         for (let i = 0; i < rates.length; i++) {
             if (rates[i].date_from > rates[i].date_to) {
@@ -98,12 +110,14 @@ const ProductManager = () => {
         } catch (error) { console.error(error); }
     };
 
+    // Confirmar eliminació
     const confirmDelete = async () => {
         await fetch(`/api/products/${itemToDelete}`, { method: 'DELETE' });
         setItemToDelete(null);
         fetchData();
     };
 
+    // Descarregar excel. Utilitzem blob perque la ruta d'exportació requereix Token
     const downloadExcel = async () => {
         try {
             const token = sessionStorage.getItem('auth_token');
@@ -113,10 +127,11 @@ const ProductManager = () => {
             });
             
             if (!res.ok) {
-                alert("Error al exportar. Código: " + res.status);
+                alert("Error al exportar. Codi: " + res.status);
                 return;
             }
 
+            // Convertim la resposta binària a blob i creem una URL temporal per descarregar
             const blob = await res.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a'); 
@@ -124,10 +139,11 @@ const ProductManager = () => {
             a.download = 'productos.xls';
             document.body.appendChild(a);
             a.click();
-            a.remove();
-        } catch (error) { console.error("Error exportando Excel:", error); }
+            a.remove(); // Netegem DOM
+        } catch (error) { console.error("Error exportant Excel:", error); }
     };
 
+    // Descarrega PDF. Utilitzem blob perque la ruta d'exportació requereix Token
     const downloadPdf = async (id) => {
         try {
             const token = sessionStorage.getItem('auth_token');
@@ -154,6 +170,7 @@ const ProductManager = () => {
 
     return (
         <div className="row">
+            {/* Modal d'eliminació en cascada */}
             {itemToDelete && (
                 <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
                     <div className="modal-dialog modal-dialog-centered">
@@ -174,6 +191,7 @@ const ProductManager = () => {
                 </div>
             )}
 
+            {/* FORMULARI LATERAL */}
             <div className="col-lg-5 mb-4">
                 <div className="card shadow-sm border-0">
                     <div className={`card-header text-white fw-bold ${editingId ? 'bg-info' : 'bg-primary'}`}>
@@ -248,7 +266,8 @@ const ProductManager = () => {
                     </div>
                 </div>
             </div>
-
+                                
+            {/* TAULA CENTRAL DE DADES I ACCIONS */}
             <div className="col-lg-7">
                 <div className="d-flex justify-content-end mb-3">
                     <button onClick={downloadExcel} className="btn btn-success fw-bold shadow-sm">

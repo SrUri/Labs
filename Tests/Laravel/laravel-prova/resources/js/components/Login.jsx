@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 
 const Login = ({ onLoginSuccess }) => {
+    // Estats formular i UI
     const [email, setEmail] = useState(''); 
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    // Petició autentificació
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -21,7 +23,9 @@ const Login = ({ onLoginSuccess }) => {
             const data = await response.json();
 
             if (response.ok) {
+                // Guardem token a la memoria
                 sessionStorage.setItem('auth_token', data.access_token);
+                // Avisem al component pare de que s'ha loggejat
                 onLoginSuccess(); 
             } else {
                 setError(data.message || 'Error acces');
@@ -42,6 +46,7 @@ const Login = ({ onLoginSuccess }) => {
                             <p className="text-muted">Accès al Backoffice</p>
                         </div>
 
+                        {/* Mostrar alerta si hi ha error d'autenticació */}
                         {error && <div className="alert alert-danger">{error}</div>}
 
                         <form onSubmit={handleLogin}>

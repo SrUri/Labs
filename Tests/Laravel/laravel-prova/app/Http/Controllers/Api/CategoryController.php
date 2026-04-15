@@ -8,15 +8,14 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    // Mostrar todas las categorías (Nuxt pedirá esto al entrar a la página)
+    // Mostrar totes les categories
     public function index()
     {
-        // Devolvemos las categorías ordenadas y adjuntamos su categoría padre si la tienen
         $categories = Category::with('parent')->orderBy('id', 'asc')->get();
         return response()->json($categories);
     }
 
-    // Guardar una nueva categoría
+    // Guardar una nova categoria
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -30,7 +29,7 @@ class CategoryController extends Controller
         return response()->json($category, 201);
     }
 
-    // Actualizar una categoría existente
+    // Actualizar categoria existent
     public function update(Request $request, string $id)
     {
         $category = Category::findOrFail($id);
@@ -46,7 +45,7 @@ class CategoryController extends Controller
         return response()->json($category->load('parent'));
     }
 
-    // Borrar una categoría
+    // Borrar una categoria
     public function destroy(string $id)
     {
         $category = Category::findOrFail($id);

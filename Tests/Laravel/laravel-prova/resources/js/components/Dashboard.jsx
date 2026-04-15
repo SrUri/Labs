@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
 const DashboardPro = ({ setActiveTab }) => {
+    // Estats principals
     const [stats, setStats] = useState({ categories: 0, products: 0, orders: 0, recent_orders: [] });
     const [loading, setLoading] = useState(true);
 
+    // Carrega de les dades del dashboard
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
@@ -24,7 +26,7 @@ const DashboardPro = ({ setActiveTab }) => {
                 <span className="badge bg-light text-dark border p-2">Actualizat: {new Date().toLocaleDateString()}</span>
             </div>
 
-            {/* TARJETAS DE ESTADO */}
+            {/* TARGETES D'ESTAT */}
             <div className="row g-4 mb-5">
                 <div className="col-md-4">
                     <div className="card border-0 shadow-sm h-100 bg-white" onClick={() => setActiveTab('categories')} style={{cursor: 'pointer'}}>
@@ -71,7 +73,7 @@ const DashboardPro = ({ setActiveTab }) => {
             </div>
 
             <div className="row g-4">
-                {/* TABLA DE COMANDAS RECIENTES */}
+                {/* TAULA DE COMANDES RECENTS */}
                 <div className="col-lg-8">
                     <div className="card border-0 shadow-sm">
                         <div className="card-header bg-white border-0 py-3">
@@ -102,7 +104,7 @@ const DashboardPro = ({ setActiveTab }) => {
                     </div>
                 </div>
 
-                {/* ACCESOS RÁPIDOS */}
+                {/* ACCESSOS RÀPIDS */}
                 <div className="col-lg-4">
                     <div className="card border-0 shadow-sm bg-success text-white">
                         <div className="card-body p-4">

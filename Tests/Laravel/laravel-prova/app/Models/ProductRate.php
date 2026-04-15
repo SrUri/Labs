@@ -11,6 +11,7 @@ class ProductRate extends Model
 
     protected $fillable = ['product_id', 'price', 'date_from', 'date_to'];
 
+    // Relació N:1 amb producte (unes tarifes pertanyen a un producte)
     public function product()
     {
         return $this->belongsTo(Product::class);

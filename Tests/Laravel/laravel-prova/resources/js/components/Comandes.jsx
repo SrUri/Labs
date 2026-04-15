@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
 const OrderManager = () => {
+    // Estats principals
     const [orders, setOrders] = useState([]);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [rateWarning, setRateWarning] = useState('');
     
+    // Estats de la UI
     const [editingId, setEditingId] = useState(null);
     const [itemToDelete, setItemToDelete] = useState(null);
 
@@ -13,30 +15,38 @@ const OrderManager = () => {
     const [form, setForm] = useState(initialForm);
     const [currentMonth, setCurrentMonth] = useState(new Date());
 
+    // Càrrega inicial de dades del Backend
     useEffect(() => { fetchData(); }, []);
 
+    // Execució constant
     useEffect(() => {
         if (form.product_id && form.order_date && form.units) {
+            // Busquem producte
             const selectedProduct = products.find(p => p.id.toString() === form.product_id.toString());
             if (selectedProduct && selectedProduct.rates && selectedProduct.rates.length > 0) {
+                // Busquem tarifa per a la data exacta
                 const applicableRate = selectedProduct.rates.find(rate => {
                     return form.order_date >= rate.date_from && form.order_date <= rate.date_to;
                 });
                 if (applicableRate) {
+                    // Si hi ha tarifa calculem
                     const total = (parseFloat(applicableRate.price) * parseInt(form.units)).toFixed(2);
                     setForm(prev => ({ ...prev, total_cost: total }));
                     setRateWarning(''); 
                 } else {
+                    // Sino avisem
                     setForm(prev => ({ ...prev, total_cost: '' }));
                     setRateWarning('No hi ha tarifa per a aquesta data.');
                 }
             } else if (selectedProduct) {
+                // Si el producte no té cap tarifa creada
                 setForm(prev => ({ ...prev, total_cost: '' }));
                 setRateWarning('Aquest producte no té tarifes.');
             }
         }
     }, [form.product_id, form.order_date, form.units, products]);
 
+    // OBtenir comandes i productes
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -48,21 +58,22 @@ const OrderManager = () => {
         setLoading(false);
     };
 
-    // Hacer clic en la comanda en el calendario para editar
+    // Clickem comanda del calendari per editar-la al formulari lateral
     const handleEdit = (order) => {
         setEditingId(order.id);
-        // Formatear fecha para el input type="date"
         const formattedDate = order.order_date.split(' ')[0]; 
         setForm({ order_date: formattedDate, product_id: order.product_id, units: order.units, total_cost: order.total_cost });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    // Cancel·lem edició
     const cancelEdit = () => {
         setEditingId(null);
         setForm(initialForm);
         setRateWarning('');
     };
 
+    // Manegador comandes
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -78,16 +89,19 @@ const OrderManager = () => {
         } catch (error) { console.error(error); }
     };
 
+    // Confirmar eliminació
     const confirmDelete = async () => {
         await fetch(`/api/orders/${itemToDelete}`, { method: 'DELETE' });
         setItemToDelete(null);
-        cancelEdit(); // Limpiamos formulario si estábamos editando esa comanda
+        cancelEdit(); // Netejem formulario
         fetchData();
     };
 
-    // --- LÓGICA DEL CALENDARIO ---
+    // Lògica calendari
     const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+    // Diumenge = 0, Dilluns = 1
     const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+    // Dilluns = 0, Dimarts = 1..., Diumenge = 6
     const startingDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
     const nextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
@@ -97,15 +111,20 @@ const OrderManager = () => {
         const days = [];
         const monthNames = ["Gener", "Febrer", "Març", "Abril", "Maig", "Juny", "Juliol", "Agost", "Setembre", "Octubre", "Novembre", "Desembre"];
         
+        // Dibuixem caselles buides
         for (let i = 0; i < startingDay; i++) {
             days.push(<div key={`empty-${i}`} className="border-end border-bottom p-2 bg-light"></div>);
         }
         
+        // Dibuixem dies del mes amb les comandes
         for (let d = 1; d <= daysInMonth; d++) {
+            // Format YYYY-MM-DD
             const currentDateStr = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            // Filtrem les comandes que corresponen al dia
             const dayOrders = orders.filter(o => o.order_date.startsWith(currentDateStr));
 
             days.push(
+                // 'minWidth: 0' i 'overflow-hidden' forcen a respectar columnes (degut a noms de comandes llargues)
                 <div key={d} className="border-end border-bottom p-2 bg-white d-flex flex-column overflow-hidden" style={{ minWidth: 0 }}>
                     <div className={`fw-bold text-end mb-2 ${d === new Date().getDate() && currentMonth.getMonth() === new Date().getMonth() ? 'text-primary' : 'text-secondary'}`}>
                         {d}
@@ -124,7 +143,7 @@ const OrderManager = () => {
             );
         }
 
-        // Rellenar las celdas vacías del final para la cuadrícula
+        // Omplim les caselles buides
         const totalCells = days.length;
         const remainder = totalCells % 7;
         if (remainder !== 0) {
@@ -147,7 +166,6 @@ const OrderManager = () => {
                         <div className="p-2 border-end text-muted">Div</div><div className="p-2 border-end text-muted">Dis</div>
                         <div className="p-2 text-muted text-danger">Diu</div>
                     </div>
-                    {/* El calendario ahora mantendrá sus columnas estrictas */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridAutoRows: 'minmax(120px, auto)' }}>{days}</div>
                 </div>
             </div>
@@ -156,7 +174,7 @@ const OrderManager = () => {
 
     return (
         <div className="row">
-            {/* MODAL DE CONFIRMACIÓN */}
+            {/* MODAL DE CONFIRMACIÓ DE DESTRUCCIÓ */}
             {itemToDelete && (
                 <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
                     <div className="modal-dialog modal-dialog-centered">
@@ -176,7 +194,8 @@ const OrderManager = () => {
                     </div>
                 </div>
             )}
-
+            
+            {/* FORMULARI LATERAL D'INSERCIÓ */}
             <div className="col-lg-3 mb-4">
                 <div className={`card shadow-sm border-0 ${editingId ? 'border border-warning' : ''}`}>
                     <div className={`card-header text-dark fw-bold ${editingId ? 'bg-warning' : 'bg-light border-bottom'}`}>
@@ -226,6 +245,7 @@ const OrderManager = () => {
                 </div>
             </div>
 
+            {/* RENDERITZACIÓ DEL CALENDARI */}
             <div className="col-lg-9">
                 {loading ? <div className="p-4 text-center">Carregant calendari...</div> : renderCalendar()}
             </div>

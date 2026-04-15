@@ -9,6 +9,7 @@ import OrderManager from './components/Comandes';
 import Login from './components/Login';
 import DashboardPro from './components/Dashboard';
 
+// Aquesta funció intercepta totes les peticions 'fetch' que fa React, autentifiquem usuari
 const setupFetchInterceptor = () => {
     const originalFetch = window.fetch;
     window.fetch = async function (resource, config = {}) {
@@ -38,25 +39,31 @@ const setupFetchInterceptor = () => {
 };
 setupFetchInterceptor();
 
+// Component principal dashboard
 const App = () => {
+    // Estat autentificació del token
     const [isAuthenticated, setIsAuthenticated] = useState(!!sessionStorage.getItem('auth_token'));
+    // Sistema d'enrutament intern (Single Page Application)
     const [activeTab, setActiveTab] = useState('dashboard');
 
+    // Tanquem sessió borrant el token
     const handleLogout = async () => {
         try {
             await fetch('/api/logout', { method: 'POST', headers: { 'Accept': 'application/json' } });
         } catch(e) {}
+        // Esborrem el token local i canviem l'estat
         sessionStorage.removeItem('auth_token');
         setIsAuthenticated(false);
     };
-
+    
+    // Si no està loggejat mostrem Login
     if (!isAuthenticated) {
         return <div className="container"><Login onLoginSuccess={() => setIsAuthenticated(true)} /></div>;
     }
 
     return (
         <div className="min-vh-100 bg-light">
-            {/* Navbar tipo Supabase/Nuxt */}
+            {/* NAVEGACIÓ PRINCIPAL */}
             <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
                 <div className="container-fluid px-4">
                     <a className="navbar-brand fw-bold d-flex align-items-center gap-2 cursor-pointer" 
@@ -98,7 +105,7 @@ const App = () => {
                 </div>
             </nav>
 
-            {/* Contenedor Principal con animación suave */}
+            {/* RENDERITZACIÓ CONDICIONAL */}
             <div className="container-fluid px-4 pb-5 fade-in">
                 {activeTab === 'dashboard' && <DashboardPro setActiveTab={setActiveTab} />}
                 {activeTab === 'categories' && <CategoryManager />}
@@ -106,6 +113,7 @@ const App = () => {
                 {activeTab === 'orders' && <OrderManager />}
             </div>
             
+            {/* Estils globals per a animacions de transició */}
             <style>{`
                 .fade-in { animation: fadeIn 0.3s ease-in-out; }
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -116,6 +124,7 @@ const App = () => {
     );
 };
 
+// Muntatge de l'aplicació React dins del DOM de HTML
 const container = document.getElementById('app') || document.getElementById('root');
 
 if (container) {

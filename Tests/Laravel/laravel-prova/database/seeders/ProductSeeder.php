@@ -10,7 +10,7 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        // Poma
+        // Producte poma golden
         $poma = Product::create([
             'code' => 'PROD-POMA',
             'name' => 'Poma Golden Eco 1kg',
@@ -19,7 +19,7 @@ class ProductSeeder extends Seeder
         ]);
         $poma->categories()->attach(Category::where('code', 'CAT-01-A')->first()->id);
 
-        // Tonyina
+        // Producte tonyina
         $tonyina = Product::create([
             'code' => 'PROD-TONY',
             'name' => 'Llom de Tonyina',

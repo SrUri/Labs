@@ -1,28 +1,30 @@
 import React, { useState, useEffect } from 'react';
 
 const CategoryManager = () => {
+    // Estats principals
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [form, setForm] = useState({ code: '', name: '', description: '', parent_id: '' });
     
-    // Nuevos estados para Edición y Modal
+    // Estats UI
     const [editingId, setEditingId] = useState(null);
     const [itemToDelete, setItemToDelete] = useState(null);
 
+    // Obtenir categories
     const fetchCategories = async () => {
         setLoading(true);
         try {
             const response = await fetch('/api/categories');
             
-            // ESCUDO: Solo guardamos los datos si la respuesta es correcta (Status 200)
+            // Només guardem si la resposta es correcta
             if (response.ok) {
                 setCategories(await response.json());
             } else {
-                console.error("Error del servidor al cargar categorías:", response.status);
-                setCategories([]); // Forzamos un array vacío para que el .map() no explote
+                console.error("Error del servidor al carregar cagtegories:", response.status);
+                setCategories([]); // Forcem array buit
             }
         } catch (error) { 
-            console.error("Error grave de red:", error); 
+            console.error("Error greu de xarxa:", error); 
             setCategories([]); 
         }
         setLoading(false);
@@ -30,7 +32,7 @@ const CategoryManager = () => {
 
     useEffect(() => { fetchCategories(); }, []);
 
-    // Preparar el formulario para editar
+    // Preparar el formulari per editar una categoria
     const handleEdit = (cat) => {
         setEditingId(cat.id);
         setForm({ 
@@ -39,17 +41,21 @@ const CategoryManager = () => {
             description: cat.description || '',
             parent_id: cat.parent_id || '' 
         });
+        // Fem un scroll suau cap amunt perquè l'usuari vegi el formulari
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    // Sortir del mode edició i netejar el formulari
     const cancelEdit = () => {
         setEditingId(null);
         setForm({ code: '', name: '', description: '', parent_id: '' });
     };
 
+    // Processar el formulari
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            // Canviem la URL i el mètode segons estat d'edició
             const url = editingId ? `/api/categories/${editingId}` : '/api/categories';
             const method = editingId ? 'PUT' : 'POST';
             
@@ -59,21 +65,22 @@ const CategoryManager = () => {
                 body: JSON.stringify(form)
             });
             cancelEdit();
-            fetchCategories();
+            fetchCategories(); // Recarreguem la taula amb les dades noves
         } catch (error) { console.error(error); }
     };
 
+    // Executar l'eliminació a la base de dades
     const confirmDelete = async () => {
         try {
             await fetch(`/api/categories/${itemToDelete}`, { method: 'DELETE' });
             setItemToDelete(null);
-            fetchCategories();
+            fetchCategories(); // Actualitzem la llista
         } catch (error) { console.error(error); }
     };
 
     return (
         <div className="row">
-            {/* MODAL PROPIO DE CONFIRMACIÓN */}
+            {/* CONFIRMACIÓ DE DESTRUCCIÓ DE DADES */}
             {itemToDelete && (
                 <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
                     <div className="modal-dialog modal-dialog-centered">
@@ -95,6 +102,7 @@ const CategoryManager = () => {
                 </div>
             )}
 
+            {/* FORMULARI LATERAL */}
             <div className="col-md-4 mb-4">
                 <div className="card shadow-sm border-0">
                     <div className={`card-header text-white fw-bold ${editingId ? 'bg-info' : 'bg-dark'}`}>
@@ -138,6 +146,7 @@ const CategoryManager = () => {
                 </div>
             </div>
 
+            {/* LLISTAT DE CATEGORIES */}
             <div className="col-md-8">
                 <div className="card shadow-sm border-0">
                     <div className="card-body p-0 table-responsive">
