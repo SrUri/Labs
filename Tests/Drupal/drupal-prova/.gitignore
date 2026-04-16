@@ -1,0 +1,31 @@
+# --- Dependencias de PHP y librerías ---
+/vendor/
+/web/core/
+/web/modules/contrib/
+/web/themes/contrib/
+/web/profiles/contrib/
+/web/libraries/
+
+# --- Configuración local y privada (SEGURIDAD) ---
+/web/sites/*/settings.local.php
+/web/sites/*/services.local.yml
+/.env
+/.env.local
+
+# --- Archivos generados por el sitio (Imágenes, documentos subidos) ---
+# Nunca subas a Git las fotos que subes desde el panel de Drupal
+/web/sites/*/files/
+/web/sites/*/private/
+
+# --- Archivos de sistema y editores ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.bak
+*.tmp
+
+# --- Drupal específico ---
+/web/sites/*/settings.php
+!/web/sites/default/default.settings.php
